@@ -21,6 +21,7 @@ class UDPClient {
       byte[] receiveData = new byte[1024];
 
       // l� uma linha do teclado
+      System.out.print(": ");
       String sentence = inFromUser.readLine();
       sendData = sentence.getBytes();
 
