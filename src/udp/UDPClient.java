@@ -1,36 +1,46 @@
+import java.io.*;
+import java.net.*;
 
-// Lê uma linha do teclado
-// Envia o pacote (linha digitada) ao servidor
-
-import java.io.*; // classes para input e output streams e
-import java.net.*;// DatagramaSocket,InetAddress,DatagramaPacket
-
-class UDPClient {
-   public static void main(String args[]) throws Exception {
-      // cria o stream do teclado
-      BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-
-      // declara socket cliente
-      DatagramSocket clientSocket = new DatagramSocket();
-
-      // obtem endereço IP do servidor com o DNS
-      InetAddress IPAddress = InetAddress.getByName("localhost");
-
-      byte[] sendData = new byte[1024];
-      byte[] receiveData = new byte[1024];
-
-      // l� uma linha do teclado
-      System.out.print(": ");
-      String sentence = inFromUser.readLine();
-      sendData = sentence.getBytes();
-
-      // cria pacote com o dado, o endereço do server e porta do servidor
-      DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
-
-      // envia o pacote
-      clientSocket.send(sendPacket);
-
-      // fecha o cliente
-      clientSocket.close();
-   }
+public class UDPClient {
+ 
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.out.println("Syntax: QuoteClient <hostname> <port>");
+            return;
+        }
+ 
+        String hostname = args[0];
+        int port = Integer.parseInt(args[1]);
+ 
+        try {
+            InetAddress address = InetAddress.getByName(hostname);
+            DatagramSocket socket = new DatagramSocket();
+ 
+            while (true) {
+ 
+                DatagramPacket request = new DatagramPacket(new byte[1], 1, address, port);
+                socket.send(request);
+ 
+                byte[] buffer = new byte[512];
+                DatagramPacket response = new DatagramPacket(buffer, buffer.length);
+                socket.receive(response);
+ 
+                String quote = new String(buffer, 0, response.getLength());
+ 
+                System.out.println(quote);
+                System.out.println();
+ 
+                Thread.sleep(10000);
+            }
+ 
+        } catch (SocketTimeoutException ex) {
+            System.out.println("Timeout error: " + ex.getMessage());
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            System.out.println("Client error: " + ex.getMessage());
+            ex.printStackTrace();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+    }
 }

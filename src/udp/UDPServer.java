@@ -1,30 +1,66 @@
-// Recebe um pacote de algum cliente
-// Separa o dado, o endereço IP e a porta deste cliente
-// Imprime o dado na tela
-
 import java.io.*;
 import java.net.*;
+import java.util.*;
+public class UDPServer {
+   private DatagramSocket socket;
+   private List<String> listQuotes = new ArrayList<String>();
+   private Random random;
 
-class UDPServer {
-   public static void main(String args[]) throws Exception {
-      // cria socket do servidor com a porta 9876
-      DatagramSocket serverSocket = new DatagramSocket(9876);
+   public UDPServer(int port) throws SocketException {
+      socket = new DatagramSocket(port);
+      random = new Random();
+   }
 
-      byte[] receiveData = new byte[1024];
-      while (true) {
-         // declara o pacote a ser recebido
-         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-
-         // recebe o pacote do cliente
-         serverSocket.receive(receivePacket);
-
-         // pega os dados, o endereço IP e a porta do cliente
-         // para poder mandar a msg de volta
-         String sentence = new String(receivePacket.getData());
-         InetAddress IPAddress = receivePacket.getAddress();
-         int port = receivePacket.getPort();
-
-         System.out.println("Mensagem recebida: " + sentence);
+   public static void main(String[] args) {
+      if (args.length < 2) {
+         System.out.println("Syntax: QuoteServer <file> <port>");
+         return;
       }
+
+      String quoteFile = args[0];
+      int port = Integer.parseInt(args[1]);
+
+      try {
+         UDPServer server = new UDPServer(port);
+         server.loadQuotesFromFile(quoteFile);
+         server.service();
+      } catch (SocketException ex) {
+         System.out.println("Socket error: " + ex.getMessage());
+      } catch (IOException ex) {
+         System.out.println("I/O error: " + ex.getMessage());
+      }
+   }
+
+   private void service() throws IOException {
+      while (true) {
+         DatagramPacket request = new DatagramPacket(new byte[1], 1);
+         socket.receive(request);
+
+         String quote = getRandomQuote();
+         byte[] buffer = quote.getBytes();
+
+         InetAddress clientAddress = request.getAddress();
+         int clientPort = request.getPort();
+
+         DatagramPacket response = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
+         socket.send(response);
+      }
+   }
+
+   private void loadQuotesFromFile(String quoteFile) throws IOException {
+      BufferedReader reader = new BufferedReader(new FileReader(quoteFile));
+      String aQuote;
+
+      while ((aQuote = reader.readLine()) != null) {
+         listQuotes.add(aQuote);
+      }
+
+      reader.close();
+   }
+
+   private String getRandomQuote() {
+      int randomIndex = random.nextInt(listQuotes.size());
+      String randomQuote = listQuotes.get(randomIndex);
+      return randomQuote;
    }
 }
