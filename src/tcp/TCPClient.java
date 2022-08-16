@@ -2,15 +2,15 @@ import java.io.*;
 import java.net.Socket;
 
 public class TCPClient {
-    private static final int PORT = 5000;
+    private static final int PORT = 5002;
 
     private static DataOutputStream dataOutputStream = null;
 
     public static void main(String[] args) {
-        try(Socket socket = new Socket("localhost",PORT)) {
+        try(Socket socket = new Socket("172.22.144.1",PORT)) {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
-            sendFile("./sent/sample.txt");
+            sendFile("./sent/less-1500.dat");
             
             dataOutputStream.close();
         }catch (Exception e){
