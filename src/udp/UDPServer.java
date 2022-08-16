@@ -5,7 +5,7 @@ public class UDPServer
     public static void main(String args[])throws IOException
     {
         byte b[] = new byte[3072];
-        DatagramSocket dsoc = new DatagramSocket(1000);
+        DatagramSocket dsoc = new DatagramSocket(5002);
         FileOutputStream f = new FileOutputStream("teste2.txt");
         while(true)
         {
