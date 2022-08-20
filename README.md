@@ -7,4 +7,3 @@ This repository has two socket implementations: one using UDP and the other usin
 
 ##### Requirements
 * [Java](https://www.oracle.com/java/technologies/downloads/)
-##### Running the project
